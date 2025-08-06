@@ -1,9 +1,10 @@
-name: Deploy Vulnerable Application                                  # workflow name
+name: Deploy Vulnerable Application # workflow name
 
 on:
-  push:
-    branches:
-      - master
+  workflow_run:
+    workflows: ["Static security Analysis"]
+    types:
+      - completed
 jobs:
   deploy-heroku:
     name: Deploy Heroku
@@ -12,7 +13,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install Heroku CLI
         run: |
-          curl https://cli-assets.heroku.com/install.sh | sh 
+          curl https://cli-assets.heroku.com/install.sh | sh
       - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
