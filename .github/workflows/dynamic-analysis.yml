@@ -1,0 +1,113 @@
+name: Dynamic Security Analysis
+
+on:
+  workflow_run:
+    workflows: ["Deploy Vulnerable Application"]
+    types:
+      - completed
+jobs:
+  init:
+    name: Install Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm install
+
+  zap_dast:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    env:
+      DEFECTDOJO_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
+      DEFECTDOJO_URL: ${{ vars.DEFECTDOJO_URL || 'https://demo.defectdojo.org' }}
+      DEFECTDOJO_ENGAGEMENT_ID: ${{ vars.DEFECTDOJO_ENGAGEMENT_ID || '15' }}
+      APP_URL: https://vulnerable-app-5104afed014a.herokuapp.com
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+      - name: install python dependencies
+        run: |
+          pip install requests
+
+      - name: Wait for app to be ready
+        run: |
+          timeout 300 bash -c 'until curl -f ${{ env.APP_URL }}/health || curl -f ${{ env.APP_URL }}; do sleep 5; done'
+        continue-on-error: true
+
+      - name: Run OWASP ZAP DAST scan
+        run: |
+          docker run -u root --rm \
+          -v $(pwd):/zap/wrk/:rw \
+          ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
+          -t ${{ env.APP_URL }} \
+          -x zap-results.xml \
+          -J zap-results.json \
+          -w zap-report.html
+        continue-on-error: true
+      - name: Upload ZAP results
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-scan-results
+          path: |
+            zap-results.xml
+            zap-results.json
+            zap-report.html
+          retention-days: 7
+      - name: Upload to OWASP Defectdojo
+        run: |
+          python .github/scripts/eko-upload-result.py zap-results.xml
+        continue-on-error: true
+
+  nuclei_dast:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    env:
+      DEFECTDOJO_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
+      DEFECTDOJO_URL: ${{ vars.DEFECTDOJO_URL || 'https://demo.defectdojo.org' }}
+      DEFECTDOJO_ENGAGEMENT_ID: ${{ vars.DEFECTDOJO_ENGAGEMENT_ID || '15' }}
+      APP_URL: https://vulnerable-app-5104afed014a.herokuapp.com
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+      - name: install python dependencies
+        run: |
+          pip install requests
+
+      - name: Wait for app to be ready
+        run: |
+          timeout 300 bash -c 'until curl -f ${{ env.APP_URL }}/health || curl -f ${{ env.APP_URL }}; do sleep 5; done'
+        continue-on-error: true
+
+      - name: Nuclei - Vulnerability Scan
+        id: nuclei_scan
+        uses: projectdiscovery/nuclei-action@main
+        with:
+          target: ${{ env.APP_URL }}
+
+      - name: GitHub Workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuclei-scan-results
+          path: nuclei.log
+          
+      - name: Upload Nuclei results to DefectDojo
+        run: |
+          if [ -f "nuclei.log" ]; then
+            python .github/scripts/eko-upload-result.py nuclei.log
+          fi
+        continue-on-error: true
