@@ -14,10 +14,10 @@ jobs:
       - name: Install Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
-      - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+      - uses: akhileshns/heroku-deploy@v3.13.15 # This is the action
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ vars.HEROKU_APP_NAME }} #Must be unique in Heroku
           heroku_email: ${{ vars.HEROKU_EMAIL }}
-          remote_branch: "master"
+          branch: "master"
           usedocker: true

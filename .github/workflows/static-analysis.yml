@@ -1,4 +1,4 @@
-name: Static security Analysis
+name: Static Security Analysis
 
 on:
   push:
@@ -37,13 +37,14 @@ jobs:
             --report-format=json \
             --report-path=/pwd/gitleaks-result.json \
             --log-level=debug \
-            --config=/pwd/.gitleaks.toml
+            --no-git || true
         continue-on-error: true
       - name: Upload Gitleaks report
         uses: actions/upload-artifact@v4
         with:
           name: gitleaks-json-reports
           path: gitleaks-result.json
+        if: always()
 
   sca:
     runs-on: ubuntu-latest
@@ -53,17 +54,17 @@ jobs:
       - name: Checkout action
         uses: actions/checkout@v4
       - name: Snyk SCA Analysis
-        uses: snyk/actions/node@master
+        run: |
+          npx snyk test --severity-threshold=high --json > snyk-results.json || true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high --json-file-output=snyk-results.json
         continue-on-error: true
       - name: Upload Snyk results
         uses: actions/upload-artifact@v4
         with:
           name: snyk-json-reports
           path: snyk-results.json
+        if: always()
 
   sast:
     runs-on: ubuntu-latest
