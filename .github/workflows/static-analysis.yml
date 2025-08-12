@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - master
+    paths:
+      - "static/**"
+      - "views/**"
+      - "*.json"
+      - "*.js"
+      - "Dockerfile"
+      - ".github/workflows/**"
+      - ".github/scripts/**"
+      - "!*.md"
 
 jobs:
   init:
