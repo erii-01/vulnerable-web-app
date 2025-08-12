@@ -98,7 +98,7 @@ jobs:
         uses: projectdiscovery/nuclei-action@main
         with:
           target: ${{ env.APP_URL }}
-          flags: "-j -o nuclei-results.json"
+          flags: "-je nuclei-results.json"
 
       - name: GitHub Workflow artifacts
         uses: actions/upload-artifact@v4
