@@ -66,6 +66,8 @@ El análisis dinámico se ejecuta **después del despliegue exitoso** y realiza 
 
 Todos los resultados de los escaneos son enviados automáticamente a DefectDojo para centralizar la gestión del ciclo de vida de vulnerabilidades detectadas.
 
+![Dashboard](dashboard-defectdojo.png)
+
 ---
 
 ### Referencias de Herramientas Utilizadas
