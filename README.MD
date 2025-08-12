@@ -2,7 +2,7 @@
 
 Para conocer los detalles sobre la implementación de las pruebas de seguridad desarrolladas según los requerimientos del proyecto, consultar la siguiente guía:
 
-- **[Pipelines de Seguridad (SAST y DAST)](SECURITY.md)**
+- **[Pipelines de Seguridad (SAST y DAST)](security-scans.md)**
 
 </br>
 
