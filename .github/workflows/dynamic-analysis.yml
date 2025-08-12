@@ -98,16 +98,18 @@ jobs:
         uses: projectdiscovery/nuclei-action@main
         with:
           target: ${{ env.APP_URL }}
+          output: nuclei-results.json
+          json: true
 
       - name: GitHub Workflow artifacts
         uses: actions/upload-artifact@v4
         with:
           name: nuclei-scan-results
-          path: nuclei.log
+          path: nuclei-results.json
 
       - name: Upload Nuclei results to DefectDojo
         run: |
-          if [ -f "nuclei.log" ]; then
-            python .github/scripts/eko-upload-result.py nuclei.log
+          if [ -f "nuclei-results.json" ]; then
+            python .github/scripts/eko-upload-result.py nuclei-results.json
           fi
         continue-on-error: true

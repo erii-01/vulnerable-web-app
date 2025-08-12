@@ -14,7 +14,7 @@ def get_scan_type(file_name):
         'snyk-results.json': 'Snyk Scan',
         'trivy-results.json': 'Trivy Scan',
         'zap-results.xml': 'ZAP Scan',
-        'nuclei.log': 'Nuclei Scan'
+        'nuclei-results.json': 'Nuclei Scan'
     }
     
     # Get the base filename
