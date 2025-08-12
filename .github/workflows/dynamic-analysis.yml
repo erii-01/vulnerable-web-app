@@ -99,7 +99,6 @@ jobs:
         with:
           target: ${{ env.APP_URL }}
           output: nuclei-results.json
-          json: true
 
       - name: GitHub Workflow artifacts
         uses: actions/upload-artifact@v4

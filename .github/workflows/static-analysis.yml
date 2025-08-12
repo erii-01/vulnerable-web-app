@@ -10,8 +10,6 @@ on:
       - "*.json"
       - "*.js"
       - "Dockerfile"
-      - ".github/workflows/**"
-      - ".github/scripts/**"
       - "!*.md"
 
 jobs:
